@@ -16,19 +16,26 @@ import static org.lwjgl.system.MemoryUtil.*;
 
 
 public class Main {
-    GLFWErrorCallback errorCallback;
-    GLFWKeyCallback keyCallback;
-    GLFWFramebufferSizeCallback fbCallback;
+    // GLFW callbacks
+    private GLFWErrorCallback errorCallback;
+    private GLFWKeyCallback keyCallback;
+    private GLFWFramebufferSizeCallback fbCallback;
+
+    // Window parameters
     private static final int glViewportX = 0;
     private static final int glViewportY = 0;
     private static final int numSamples = 8;
-    long window;
-    static int WIN_WIDTH = 1800, WIN_HEIGHT = 1200;
+    private long window;
+    private static int WIN_WIDTH = 1800, WIN_HEIGHT = 1200;
+    int WIN_POS_X = 30, WIN_POX_Y = 90;
+
+    // Clear color
     float CLEAR_COLOR_RED = 0.0f;
     float CLEAR_COLOR_GREEN = 0.0f;
     float CLEAR_COLOR_BLUE = 1.0f;
     float CLEAR_COLOR_ALPHA = 1.0f;
-    int WIN_POS_X = 30, WIN_POX_Y = 90;
+
+    // Viewport coordinates
     private static final float leftBottomX = -20f;
     private static final float leftBottomY = -20f;
     private static final float rightBottomX = 20f;
@@ -37,30 +44,42 @@ public class Main {
     private static final float rightTopY = 20f;
     private static final float leftTopX = -20f;
     private static final float leftTopY = 20f;
+
+    // Vertex pointer parameters
     private static final int glVertexPointerSize = 2, glVertexPointerStride = 0;
     private static final long glVertexPointerPoint = 0L;
+
+    // OpenGL matrix size
     private static final int OGL_MATRIX_SIZE = 16;
 
+    // Orthographic projection parameters
     private static final float ORTHO_LEFT = -100f;
     private static final float ORTHO_RIGHT = 100f;
     private static final float ORTHO_BOTTOM = -100f;
     private static final float ORTHO_TOP = 100f;
     private static final float ORTHO_NEAR = 0f;
     private static final float ORTHO_FAR = 10f;
+
+    // Color parameters
     private static final float COLOR_RED = 1.0f;
     private static final float COLOR_GREEN = 0.498f;
     private static final float COLOR_BLUE = 0.153f;
+
+    // Fragment shader color parameters
     private static final float FRAG_COLOR_RED = 0.5f;
     private static final float FRAG_COLOR_GREEN = 0.7f;
     private static final float FRAG_COLOR_BLUE = 0.1f;
     private static final float FRAG_COLOR_ALPHA = 1.0f;
+
+    // Draw parameters
     private static final int DRAW_COUNT = 6;
     private static final long DRAW_OFFSET = 0L;
+
     // call glCreateProgram() here - we have no gl-context here
-    int shader_program;
-    Matrix4f viewProjMatrix = new Matrix4f();
-    FloatBuffer myFloatBuffer = BufferUtils.createFloatBuffer(OGL_MATRIX_SIZE);
-    int vpMatLocation = 0, renderColorLocation = 0;
+    private int shader_program;
+    private Matrix4f viewProjMatrix = new Matrix4f();
+    private FloatBuffer myFloatBuffer = BufferUtils.createFloatBuffer(OGL_MATRIX_SIZE);
+    private int vpMatLocation = 0, renderColorLocation = 0;
     public static void main(String[] args) {
         new csc133.slWindow().slWindow(WIN_WIDTH, WIN_HEIGHT);
         new Main().render();

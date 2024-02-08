@@ -5,7 +5,6 @@ import org.joml.Matrix4f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
-import org.lwjgl.system.*;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import static org.lwjgl.glfw.GLFW.*;
@@ -27,7 +26,7 @@ public class Main {
     private static final int numSamples = 8;
     private long window;
     private static int WIN_WIDTH = 1800, WIN_HEIGHT = 1200;
-    int WIN_POS_X = 30, WIN_POX_Y = 90;
+    static int WIN_POS_X = 30, WIN_POX_Y = 90;
 
     // Clear color
     float CLEAR_COLOR_RED = 0.0f;
@@ -36,14 +35,16 @@ public class Main {
     float CLEAR_COLOR_ALPHA = 1.0f;
 
     // Viewport coordinates
-    private static final float leftBottomX = -20f;
-    private static final float leftBottomY = -20f;
-    private static final float rightBottomX = 20f;
-    private static final float rightBottomY = -20f;
-    private static final float rightTopX = 20f;
-    private static final float rightTopY = 20f;
-    private static final float leftTopX = -20f;
-    private static final float leftTopY = 20f;
+    private static final float squareSize = 10f;
+    private static final float halfSquareSize = squareSize / 2f;
+    private static final float yOffset = 150f;
+    private static final float xOffset = squareSize;
+
+    private static final float xMin = -halfSquareSize + xOffset;
+    private static final float xMax = halfSquareSize + xOffset;
+    private static final float yMin = -halfSquareSize + yOffset;
+    private static final float yMax = halfSquareSize + yOffset;
+
 
     // Vertex pointer parameters
     private static final int glVertexPointerSize = 2, glVertexPointerStride = 0;
@@ -53,10 +54,10 @@ public class Main {
     private static final int OGL_MATRIX_SIZE = 16;
 
     // Orthographic projection parameters
-    private static final float ORTHO_LEFT = -100f;
-    private static final float ORTHO_RIGHT = 100f;
-    private static final float ORTHO_BOTTOM = -100f;
-    private static final float ORTHO_TOP = 100f;
+    private static final float ORTHO_LEFT = 0f;
+    private static final float ORTHO_RIGHT = 200f;
+    private static final float ORTHO_BOTTOM = 0f;
+    private static final float ORTHO_TOP = 200f;
     private static final float ORTHO_NEAR = 0f;
     private static final float ORTHO_FAR = 10f;
 
@@ -81,7 +82,7 @@ public class Main {
     private FloatBuffer myFloatBuffer = BufferUtils.createFloatBuffer(OGL_MATRIX_SIZE);
     private int vpMatLocation = 0, renderColorLocation = 0;
     public static void main(String[] args) {
-        new csc133.slWindow().slWindow(WIN_WIDTH, WIN_HEIGHT);
+        new slWindow().slWindow(WIN_WIDTH, WIN_HEIGHT);
         new Main().render();
     } // public static void main(String[] args)
     void render() {
@@ -177,26 +178,47 @@ public class Main {
         while (!glfwWindowShouldClose(window)) {
             glfwPollEvents();
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            int vbo = glGenBuffers();
-            int ibo = glGenBuffers();
-            float[] vertices = {leftBottomX, leftBottomY, rightBottomX, rightBottomY, rightTopX, rightTopY, leftTopX, leftTopY};
-            int[] indices = {0, 1, 2, 0, 2, 3};
-            glBindBuffer(GL_ARRAY_BUFFER, vbo);
-            glBufferData(GL_ARRAY_BUFFER, (FloatBuffer) BufferUtils.
-                    createFloatBuffer(vertices.length).
-                    put(vertices).flip(), GL_STATIC_DRAW);
-            glEnableClientState(GL_VERTEX_ARRAY);
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, (IntBuffer) BufferUtils.
-                    createIntBuffer(indices.length).
-                    put(indices).flip(), GL_STATIC_DRAW);
-            glVertexPointer(glVertexPointerSize, GL_FLOAT, glVertexPointerStride, glVertexPointerPoint);
-            viewProjMatrix.setOrtho(ORTHO_LEFT, ORTHO_RIGHT, ORTHO_BOTTOM, ORTHO_TOP, ORTHO_NEAR, ORTHO_FAR);
-            glUniformMatrix4fv(vpMatLocation, false,
-                    viewProjMatrix.get(myFloatBuffer));
-            glUniform3f(renderColorLocation, COLOR_RED, COLOR_GREEN, COLOR_BLUE);
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-            glDrawElements(GL_TRIANGLES, DRAW_COUNT , GL_UNSIGNED_INT, DRAW_OFFSET);
+
+            int MAX_ROWS = 7, MAX_COLS = 5;
+
+            for (int row = 0; row < MAX_ROWS; row++) { // Change 2 to the desired number of rows
+                for (int col = 0; col < MAX_COLS; col++) { // Change 5 to the desired number of columns
+                    int vbo = glGenBuffers();
+                    int ibo = glGenBuffers();
+                    int flipRow = 1-row;
+                    float padding = 10f;
+
+                    float xOffset = col * (squareSize + padding); // Calculate offset for columns
+                    float yOffset = (flipRow) * (squareSize + padding); // Calculate offset for rows
+
+
+                    float[] vertices = {
+                            xMin + xOffset, yMin + yOffset,                      // Bottom-left
+                            xMax + xOffset, yMin + yOffset,                      // Bottom-right
+                            xMax + xOffset, yMax + yOffset,                      // Top-right
+                            xMin + xOffset, yMax + yOffset                       // Top-left
+                    };
+
+                    int[] indices = {0, 1, 2, 0, 2, 3};
+
+                    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+                    glBufferData(GL_ARRAY_BUFFER, (FloatBuffer) BufferUtils.createFloatBuffer(vertices.length).put(vertices).flip(), GL_STATIC_DRAW);
+                    glEnableClientState(GL_VERTEX_ARRAY);
+                    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+                    glBufferData(GL_ELEMENT_ARRAY_BUFFER, (IntBuffer) BufferUtils.createIntBuffer(indices.length).put(indices).flip(), GL_STATIC_DRAW);
+                    glVertexPointer(glVertexPointerSize, GL_FLOAT, glVertexPointerStride, glVertexPointerPoint);
+
+                    viewProjMatrix.setOrtho(ORTHO_LEFT, ORTHO_RIGHT, ORTHO_BOTTOM, ORTHO_TOP, ORTHO_NEAR, ORTHO_FAR);
+                    glUniformMatrix4fv(vpMatLocation, false, viewProjMatrix.get(myFloatBuffer));
+                    glUniform3f(renderColorLocation, COLOR_RED, COLOR_GREEN, COLOR_BLUE);
+                    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+                    glDrawElements(GL_TRIANGLES, DRAW_COUNT , GL_UNSIGNED_INT, DRAW_OFFSET);
+
+                    glDeleteBuffers(vbo);
+                    glDeleteBuffers(ibo);
+                }
+            }
+
             glfwSwapBuffers(window);
         }
     } // renderObjects

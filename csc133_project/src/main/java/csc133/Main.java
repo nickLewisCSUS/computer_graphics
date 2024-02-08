@@ -37,7 +37,7 @@ public class Main {
     // Viewport coordinates
     private static final float squareSize = 10f;
     private static final float halfSquareSize = squareSize / 2f;
-    private static final float yOffset = 150f;
+    private static final float yOffset = 145f;
     private static final float xOffset = squareSize;
 
     private static final float xMin = -halfSquareSize + xOffset;
@@ -188,15 +188,15 @@ public class Main {
                     int flipRow = 1-row;
                     float padding = 10f;
 
-                    float xOffset = col * (squareSize + padding); // Calculate offset for columns
-                    float yOffset = (flipRow) * (squareSize + padding); // Calculate offset for rows
+                    float renderXOffset = col * (squareSize + padding); // Calculate offset for columns
+                    float renderYOffset = (flipRow) * (squareSize + padding); // Calculate offset for rows
 
 
                     float[] vertices = {
-                            xMin + xOffset, yMin + yOffset,                      // Bottom-left
-                            xMax + xOffset, yMin + yOffset,                      // Bottom-right
-                            xMax + xOffset, yMax + yOffset,                      // Top-right
-                            xMin + xOffset, yMax + yOffset                       // Top-left
+                            xMin + renderXOffset, yMin + renderYOffset,                      // Bottom-left
+                            xMax + renderXOffset, yMin + renderYOffset,                      // Bottom-right
+                            xMax + renderXOffset, yMax + renderYOffset,                      // Top-right
+                            xMin + renderXOffset, yMax + renderYOffset                       // Top-left
                     };
 
                     int[] indices = {0, 1, 2, 0, 2, 3};

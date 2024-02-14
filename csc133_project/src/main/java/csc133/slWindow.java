@@ -15,6 +15,7 @@ public class slWindow {
 
     // GLFW callbacks
     private GLFWErrorCallback errorCallback;
+    GLFWKeyCallback keyCallback;
     private GLFWFramebufferSizeCallback fbCallback;
 
     // Window parameters

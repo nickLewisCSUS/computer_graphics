@@ -76,16 +76,16 @@ public class Main {
     private Matrix4f viewProjMatrix = new Matrix4f();
     private FloatBuffer myFloatBuffer = BufferUtils.createFloatBuffer(OGL_MATRIX_SIZE);
     private int vpMatLocation = 0, renderColorLocation = 0;
-    public static void main(String[] args) {
-        window =  new slWindow(WIN_WIDTH, WIN_HEIGHT, WIN_POS_X, WIN_POS_Y);
-        new Main().render();
 
+    public static void main(String[] args) {
+        window = new slWindow(WIN_WIDTH, WIN_HEIGHT, WIN_POS_X, WIN_POS_Y);
+        new Main().render();
+        window.destroy();
     } // public static void main(String[] args)
+
     void render() {
         try {
-            window.initGLFWindow();
             renderLoop();
-            glfwDestroyWindow(window.getWindowID());
             window.getKeyCallback().free();
             window.getFbCallback().free();
         } finally {

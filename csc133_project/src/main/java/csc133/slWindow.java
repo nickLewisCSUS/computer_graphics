@@ -33,6 +33,7 @@ public class slWindow {
         this.WIN_HEIGHT = win_height;
         this.WIN_POS_X = win_x;
         this. WIN_POS_Y = win_y;
+        initGLFWindow();
     }
 
     public void initGLFWindow() {
@@ -74,18 +75,18 @@ public class slWindow {
     } // private void initGLFWindow()
 
 
+    public void destroy(){
+        glfwDestroyWindow(window);
+    }
     public long getWindowID(){
         return window;
     }
-
     public GLFWErrorCallback getErrorCallback(){
         return errorCallback;
     }
-
     public GLFWKeyCallback getKeyCallback(){
         return keyCallback;
     }
-
     public GLFWFramebufferSizeCallback getFbCallback(){
         return fbCallback;
     }

@@ -15,23 +15,18 @@ import static org.lwjgl.system.MemoryUtil.*;
 
 
 public class Main {
-    // GLFW callbacks
-    private GLFWErrorCallback errorCallback;
-    private GLFWKeyCallback keyCallback;
-    private GLFWFramebufferSizeCallback fbCallback;
 
     // Window parameters
     private static final int glViewportX = 0;
     private static final int glViewportY = 0;
-    private static final int numSamples = 8;
-    private long window;
+    private static slWindow window;
     private static int WIN_WIDTH = 1800, WIN_HEIGHT = 1200;
-    static int WIN_POS_X = 30, WIN_POX_Y = 90;
+    static int WIN_POS_X = 30, WIN_POS_Y = 90;
 
     // Clear color
-    float CLEAR_COLOR_RED = 0.0f;
-    float CLEAR_COLOR_GREEN = 0.0f;
-    float CLEAR_COLOR_BLUE = 1.0f;
+    float CLEAR_COLOR_RED = 0.5f;
+    float CLEAR_COLOR_GREEN = 0.1f;
+    float CLEAR_COLOR_BLUE = 0.5f;
     float CLEAR_COLOR_ALPHA = 1.0f;
 
     // Viewport coordinates
@@ -82,64 +77,28 @@ public class Main {
     private FloatBuffer myFloatBuffer = BufferUtils.createFloatBuffer(OGL_MATRIX_SIZE);
     private int vpMatLocation = 0, renderColorLocation = 0;
     public static void main(String[] args) {
-        new slWindow().slWindow(WIN_WIDTH, WIN_HEIGHT);
+        window =  new slWindow(WIN_WIDTH, WIN_HEIGHT, WIN_POS_X, WIN_POS_Y);
         new Main().render();
+
     } // public static void main(String[] args)
     void render() {
         try {
-            initGLFWindow();
+            window.initGLFWindow();
             renderLoop();
-            glfwDestroyWindow(window);
-            keyCallback.free();
-            fbCallback.free();
+            glfwDestroyWindow(window.getWindowID());
+            window.getKeyCallback().free();
+            window.getFbCallback().free();
         } finally {
             glfwTerminate();
             glfwSetErrorCallback(null).free();
         }
     } // void render()
-    private void initGLFWindow() {
-        glfwSetErrorCallback(errorCallback =
-                GLFWErrorCallback.createPrint(System.err));
-        if (!glfwInit())
-            throw new IllegalStateException("Unable to initialize GLFW");
-        glfwDefaultWindowHints();
-        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-        glfwWindowHint(GLFW_SAMPLES, numSamples);
-        window = glfwCreateWindow(WIN_WIDTH, WIN_HEIGHT, "CSC 133", NULL, NULL);
-        if (window == NULL)
-            throw new RuntimeException("Failed to create the GLFW window");
-        glfwSetKeyCallback(window, keyCallback = new GLFWKeyCallback() {
-            @Override
-            public void invoke(long window, int key, int scancode, int action, int
-                    mods) {
-                if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE)
-                    glfwSetWindowShouldClose(window, true);
-            }
-        });
-        glfwSetFramebufferSizeCallback(window, fbCallback = new
-                GLFWFramebufferSizeCallback() {
-                    @Override
-                    public void invoke(long window, int w, int h) {
-                        if (w > 0 && h > 0) {
-                            WIN_WIDTH = w;
-                            WIN_HEIGHT = h;
-                        }
-                    }
-                });
-        GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-        glfwSetWindowPos(window, WIN_POS_X, WIN_POX_Y);
-        glfwMakeContextCurrent(window);
-        int VSYNC_INTERVAL = 1;
-        glfwSwapInterval(VSYNC_INTERVAL);
-        glfwShowWindow(window);
-    } // private void initGLFWindow()
     void renderLoop() {
         glfwPollEvents();
         initOpenGL();
         renderObjects();
         /* Process window messages in the main thread */
-        while (!glfwWindowShouldClose(window)) {
+        while (!glfwWindowShouldClose(window.getWindowID())) {
             glfwWaitEvents();
         }
     } // void renderLoop()
@@ -175,7 +134,7 @@ public class Main {
         return;
     } // void initOpenGL()
     void renderObjects() {
-        while (!glfwWindowShouldClose(window)) {
+        while (!glfwWindowShouldClose(window.getWindowID())) {
             glfwPollEvents();
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -186,7 +145,7 @@ public class Main {
                     int vbo = glGenBuffers();
                     int ibo = glGenBuffers();
                     int flipRow = 1-row;
-                    float padding = 10f;
+                    float padding = 5f;
 
                     float renderXOffset = col * (squareSize + padding); // Calculate offset for columns
                     float renderYOffset = (flipRow) * (squareSize + padding); // Calculate offset for rows
@@ -219,7 +178,7 @@ public class Main {
                 }
             }
 
-            glfwSwapBuffers(window);
+            glfwSwapBuffers(window.getWindowID());
         }
     } // renderObjects
 }

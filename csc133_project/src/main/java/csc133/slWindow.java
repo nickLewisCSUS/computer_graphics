@@ -13,42 +13,33 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class slWindow {
 
-    // GLFW callbacks
-    private GLFWErrorCallback errorCallback;
-    GLFWKeyCallback keyCallback;
-    private GLFWFramebufferSizeCallback fbCallback;
-
-    // Window parameters
-    private int numSamples = 8;
-    private int WIN_WIDTH, WIN_HEIGHT;
-    private long window;
-    static int WIN_POS_X, WIN_POS_Y;
-
     public slWindow(int win_width, int win_height, int win_x, int win_y) {
 
         System.out.println("Call to slWindow:: (width, height) == ("
                         + win_width + ", " + win_height +") received!");
 
-        this.WIN_WIDTH = win_width;
-        this.WIN_HEIGHT = win_height;
-        this.WIN_POS_X = win_x;
-        this. WIN_POS_Y = win_y;
+        SPOT.WIN_WIDTH = win_width;
+        SPOT.WIN_HEIGHT = win_height;
+        SPOT.WIN_POS_X = win_x;
+        SPOT.WIN_POS_Y = win_y;
         initGLFWindow();
     }
 
     public void initGLFWindow() {
-        glfwSetErrorCallback(errorCallback =
+        glfwSetErrorCallback(SPOT.errorCallback =
                 GLFWErrorCallback.createPrint(System.err));
         if (!glfwInit())
             throw new IllegalStateException("Unable to initialize GLFW");
         glfwDefaultWindowHints();
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+        // Window parameters
+        int numSamples = 8;
         glfwWindowHint(GLFW_SAMPLES, numSamples);
-        window = glfwCreateWindow(WIN_WIDTH, WIN_HEIGHT, "CSC 133", NULL, NULL);
-        if (window == NULL)
+        SPOT.window = glfwCreateWindow(SPOT.WIN_WIDTH, SPOT.WIN_HEIGHT, "CSC 133", NULL, NULL);
+        if (SPOT.window == NULL)
             throw new RuntimeException("Failed to create the GLFW window");
-        glfwSetKeyCallback(window, keyCallback = new GLFWKeyCallback() {
+        glfwSetKeyCallback(SPOT.window, SPOT.keyCallback = new GLFWKeyCallback() {
             @Override
             public void invoke(long window, int key, int scancode, int action, int
                     mods) {
@@ -56,39 +47,39 @@ public class slWindow {
                     glfwSetWindowShouldClose(window, true);
             }
         });
-        glfwSetFramebufferSizeCallback(window, fbCallback = new
+        glfwSetFramebufferSizeCallback(SPOT.window, SPOT.fbCallback = new
                 GLFWFramebufferSizeCallback() {
                     @Override
                     public void invoke(long window, int w, int h) {
                         if (w > 0 && h > 0) {
-                            WIN_WIDTH = w;
-                            WIN_HEIGHT = h;
+                            SPOT.WIN_WIDTH = w;
+                            SPOT.WIN_HEIGHT = h;
                         }
                     }
                 });
         GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-        glfwSetWindowPos(window, WIN_POS_X, WIN_POS_Y);
-        glfwMakeContextCurrent(window);
+        glfwSetWindowPos(SPOT.window, SPOT.WIN_POS_X, SPOT.WIN_POS_Y);
+        glfwMakeContextCurrent(SPOT.window);
         int VSYNC_INTERVAL = 1;
         glfwSwapInterval(VSYNC_INTERVAL);
-        glfwShowWindow(window);
+        glfwShowWindow(SPOT.window);
     } // private void initGLFWindow()
 
 
     public void destroy(){
-        glfwDestroyWindow(window);
+        glfwDestroyWindow(SPOT.window);
     }
     public long getWindowID(){
-        return window;
+        return SPOT.window;
     }
     public GLFWErrorCallback getErrorCallback(){
-        return errorCallback;
+        return SPOT.errorCallback;
     }
     public GLFWKeyCallback getKeyCallback(){
-        return keyCallback;
+        return SPOT.keyCallback;
     }
     public GLFWFramebufferSizeCallback getFbCallback(){
-        return fbCallback;
+        return SPOT.fbCallback;
     }
 
 }

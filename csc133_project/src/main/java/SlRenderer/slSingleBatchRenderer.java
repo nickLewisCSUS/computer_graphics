@@ -15,64 +15,44 @@ import static org.lwjgl.opengl.GL20.*;
 
 
 public class slSingleBatchRenderer {
-
-    private static slWindow window;
-
-    // Clear color
-    float CLEAR_COLOR_RED = 0.5f;
-    float CLEAR_COLOR_GREEN = 0.1f;
-    float CLEAR_COLOR_BLUE = 0.5f;
-    float CLEAR_COLOR_ALPHA = 1.0f;
-
-
-    // Fragment shader color parameters
-    private static final float FRAG_COLOR_RED = 0.5f;
-    private static final float FRAG_COLOR_GREEN = 0.7f;
-    private static final float FRAG_COLOR_BLUE = 0.1f;
-    private static final float FRAG_COLOR_ALPHA = 1.0f;
-
-    // Draw parameters
-    private static final int DRAW_COUNT = 6;
-    private static final long DRAW_OFFSET = 0L;
-
-    private int shader_program;
-    private Matrix4f viewProjMatrix = new Matrix4f();
-    private FloatBuffer myFloatBuffer = BufferUtils.createFloatBuffer(SPOT.OGL_MATRIX_SIZE);
-    private int vpMatLocation = 0, renderColorLocation = 0;
+    private slGoLBoard goLBoard;
 
     public slSingleBatchRenderer() {
-        window = new slWindow(SPOT.WIN_WIDTH, SPOT.WIN_HEIGHT, SPOT.WIN_POS_X, SPOT.WIN_POS_Y);
+        SPOT.window = new slWindow(SPOT.WIN_WIDTH, SPOT.WIN_HEIGHT, SPOT.WIN_POS_X, SPOT.WIN_POS_Y);
+        goLBoard = new slGoLBoard(SPOT.MAX_ROWS, SPOT.MAX_COLS);
     } // public static void main(String[] args)
 
     public void render() {
         try {
             renderLoop();
-            window.getKeyCallback().free();
-            window.getFbCallback().free();
+            SPOT.window.getKeyCallback().free();
+            SPOT.window.getFbCallback().free();
         } finally {
             glfwTerminate();
             glfwSetErrorCallback(null).free();
         }
-        window.destroy();
+        SPOT.window.destroy();
     } // void render()
     void renderLoop() {
-        glfwPollEvents();
         initOpenGL();
-        renderObjects();
         /* Process window messages in the main thread */
-        while (!glfwWindowShouldClose(window.getWindowID())) {
-            glfwWaitEvents();
+        while (!glfwWindowShouldClose(SPOT.window.getWindowID())) {
+            glfwPollEvents();
+            goLBoard.updateBoard(); // Update board state
+            renderObjects();
+            glfwSwapBuffers(SPOT.window.getWindowID());
+            //glfwPollEvents();
         }
     } // void renderLoop()
-    void initOpenGL() {
+     void initOpenGL() {
         GL.createCapabilities();
 
 
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
         glViewport(SPOT.glViewportX, SPOT.glViewportY, SPOT.WIN_WIDTH, SPOT.WIN_HEIGHT);
-        glClearColor(CLEAR_COLOR_RED, CLEAR_COLOR_GREEN, CLEAR_COLOR_BLUE, CLEAR_COLOR_ALPHA);
-        this.shader_program = glCreateProgram();
+        glClearColor(SPOT.CLEAR_COLOR_RED, SPOT.CLEAR_COLOR_GREEN, SPOT.CLEAR_COLOR_BLUE, SPOT.CLEAR_COLOR_ALPHA);
+        SPOT.shader_program = glCreateProgram();
         int vs = glCreateShader(GL_VERTEX_SHADER);
         glShaderSource(vs,
                 "uniform mat4 viewProjMatrix;" +
@@ -80,23 +60,22 @@ public class slSingleBatchRenderer {
                         " gl_Position = viewProjMatrix * gl_Vertex;" +
                         "}");
         glCompileShader(vs);
-        glAttachShader(shader_program, vs);
+        glAttachShader(SPOT.shader_program, vs);
         int fs = glCreateShader(GL_FRAGMENT_SHADER);
         glShaderSource(fs,
                 "uniform vec3 color;" +
                         "void main(void) {" +
-                        " gl_FragColor = vec4(" + FRAG_COLOR_RED + ", " + FRAG_COLOR_GREEN + ", " +
-                        FRAG_COLOR_BLUE + ", " + FRAG_COLOR_ALPHA + ");" +
+                        " gl_FragColor = vec4(" + SPOT.FRAG_COLOR_RED + ", " + SPOT.FRAG_COLOR_GREEN + ", " +
+                        SPOT.FRAG_COLOR_BLUE + ", " + SPOT.FRAG_COLOR_ALPHA + ");" +
                         "}");
         glCompileShader(fs);
-        glAttachShader(shader_program, fs);
-        glLinkProgram(shader_program);
-        glUseProgram(shader_program);
-        vpMatLocation = glGetUniformLocation(shader_program, "viewProjMatrix");
+        glAttachShader(SPOT.shader_program, fs);
+        glLinkProgram(SPOT.shader_program);
+        glUseProgram(SPOT.shader_program);
+        SPOT.vpMatLocation = glGetUniformLocation(SPOT.shader_program, "viewProjMatrix");
         return;
     } // void initOpenGL()
     void renderObjects() {
-        while (!glfwWindowShouldClose(window.getWindowID())) {
             glfwPollEvents();
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -127,23 +106,31 @@ public class slSingleBatchRenderer {
                     glBufferData(GL_ELEMENT_ARRAY_BUFFER, (IntBuffer) BufferUtils.createIntBuffer(indices.length).put(indices).flip(), GL_STATIC_DRAW);
                     glVertexPointer(SPOT.glVertexPointerSize, GL_FLOAT, SPOT.glVertexPointerStride, SPOT.glVertexPointerPoint);
 
+
+
+                    // Update color based on cell state
+                    if (goLBoard.isCellAlive(row, col)) {
+                        glUniform3f(SPOT.renderColorLocation, 0.0f, 1.0f, 0.0f); // Green for live cell
+                    } else {
+                        glUniform3f(SPOT.renderColorLocation, 1.0f, 0.0f, 0.0f); // Red for dead cell
+                    }
+
                     //viewProjMatrix.setOrtho(ORTHO_LEFT, ORTHO_RIGHT, ORTHO_BOTTOM, ORTHO_TOP, ORTHO_NEAR, ORTHO_FAR);
                     slCamera my_cam = new slCamera();
                     my_cam.setProjectionOrtho(SPOT.ORTHO_LEFT, SPOT.ORTHO_RIGHT, SPOT.ORTHO_BOTTOM, SPOT.ORTHO_TOP, SPOT.ORTHO_NEAR, SPOT.ORTHO_FAR);
-                    viewProjMatrix = my_cam.getProjectionMatrix();
+                    SPOT.viewProjMatrix = my_cam.getProjectionMatrix();
+                    glUniformMatrix4fv(SPOT.vpMatLocation, false, SPOT.viewProjMatrix.get(SPOT.myFloatBuffer));
 
-                    glUniformMatrix4fv(vpMatLocation, false, viewProjMatrix.get(myFloatBuffer));
-                    glUniform3f(renderColorLocation, SPOT.COLOR_BLUE, SPOT.COLOR_GREEN, SPOT.COLOR_BLUE);
+                    //glUniform3f(SPOT.renderColorLocation, SPOT.COLOR_BLUE, SPOT.COLOR_GREEN, SPOT.COLOR_BLUE);
                     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-                    glDrawElements(GL_TRIANGLES, DRAW_COUNT , GL_UNSIGNED_INT, DRAW_OFFSET);
+                    glDrawElements(GL_TRIANGLES, SPOT.DRAW_COUNT , GL_UNSIGNED_INT, SPOT.DRAW_OFFSET);
 
                     glDeleteBuffers(vbo);
                     glDeleteBuffers(ibo);
                 }
             }
 
-            glfwSwapBuffers(window.getWindowID());
-        }
+            glfwSwapBuffers(SPOT.window.getWindowID());
     } // renderObjects
 
 }

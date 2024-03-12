@@ -29,15 +29,15 @@ public class slGoLBoard {
     public void updateBoard() {
         for (int row = 0; row < numRows; row++) {
             for (int col = 0; col < numCols; col++) {
-                int liveNeighbors = countLiveNeighbors(row, col);
+                int degreeTwoNeighbors = countDegreeTwoNeighbors(row, col);
                 if (liveCellArray[row][col]) {
                     // Any live cell with fewer than two live neighbors dies
                     // Any live cell with two or three live neighbors lives on to the next generation
                     // Any live cell with more than three live neighbors dies
-                    nextCellArray[row][col] = liveNeighbors == 2 || liveNeighbors == 3;
+                    nextCellArray[row][col] = degreeTwoNeighbors == 2 || degreeTwoNeighbors == 3;
                 } else {
                     // Any dead cell with exactly three live neighbors becomes a live cell
-                    nextCellArray[row][col] = liveNeighbors == 3;
+                    nextCellArray[row][col] = degreeTwoNeighbors == 3;
                 }
             }
         }
@@ -47,10 +47,10 @@ public class slGoLBoard {
         nextCellArray = temp;
     }
 
-    private int countLiveNeighbors(int row, int col) {
+    private int countDegreeTwoNeighbors(int row, int col) {
         int count = 0;
-        for (int i = row - 1; i <= row + 1; i++) {
-            for (int j = col - 1; j <= col + 1; j++) {
+        for (int i = row - 2; i <= row + 2; i++) {
+            for (int j = col - 2; j <= col + 2; j++) {
                 if (i >= 0 && i < numRows && j >= 0 && j < numCols && !(i == row && j == col)) {
                     if (liveCellArray[i][j]) {
                         count++;

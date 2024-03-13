@@ -67,7 +67,7 @@ public class slGoLBoard {
             for (int col = 0; col < numCols; col++) {
                 status.append(isCellAlive(row, col) ? "1" : "0");
             }
-            status.append("\n"); // Add a newline after each row
+            status.append("\n"); 
         }
         return status.toString();
     }

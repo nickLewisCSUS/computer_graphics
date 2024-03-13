@@ -3,10 +3,10 @@ package SlRenderer;
 import java.util.Random;
 
 public class slGoLBoard {
-    private boolean[][] liveCellArray;
+    private static boolean[][] liveCellArray;
     private boolean[][] nextCellArray;
-    private int numRows;
-    private int numCols;
+    private static int numRows;
+    private static int numCols;
 
     public slGoLBoard(int numRows, int numCols) {
         this.numRows = numRows;
@@ -16,7 +16,7 @@ public class slGoLBoard {
         initializeBoard();
     }
 
-    private void initializeBoard() {
+    public void initializeBoard() {
         // Initialize the board here (randomly or as needed)
         Random random = new Random();
         for (int row = 0; row < numRows; row++) {
@@ -61,7 +61,22 @@ public class slGoLBoard {
         return count;
     }
 
-    public boolean isCellAlive(int row, int col) {
+    public static String getStatus() {
+        StringBuilder status = new StringBuilder();
+        for (int row = 0; row < numRows; row++) {
+            for (int col = 0; col < numCols; col++) {
+                status.append(isCellAlive(row, col) ? "1" : "0");
+            }
+            status.append("\n"); // Add a newline after each row
+        }
+        return status.toString();
+    }
+
+    public static boolean isCellAlive(int row, int col) {
         return liveCellArray[row][col];
+    }
+    public static void setCellState(int row, int col, boolean state) {
+        // Set the state of the cell at the specified row and column
+        liveCellArray[row][col] = state;
     }
 }

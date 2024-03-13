@@ -89,4 +89,16 @@ public class SPOT {
     public static float f_near;
     public static float f_far;
 
+    // toggle keys for window
+    public static boolean toggleDelay = false;
+    public static boolean restartRendering = false;
+    public static boolean haltRendering = false;
+    public static boolean dKeyPressedLastFrame = false;
+    public static boolean showFrameRate = false;
+    public static boolean fKeyPressedLastFrame = false;
+    public static boolean rKeyPressedLastFrame = false;
+    public static boolean sKeyPressedLastFrame = false;
+    public static boolean lKeyPressedLastFrame = false;
+    public static boolean questionKeyPressedLastFrame = false;
+    public static boolean showUsage = false;
 }

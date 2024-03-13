@@ -16,4 +16,6 @@ public class SPOT {
     public static long window;
     public static int WIN_POS_X, WIN_POS_Y;
 
+    public static double lastFrameTime;
+
 }

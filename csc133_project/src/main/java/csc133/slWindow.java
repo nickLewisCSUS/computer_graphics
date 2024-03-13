@@ -82,4 +82,19 @@ public class slWindow {
         return SPOT.fbCallback;
     }
 
+    public boolean isKeyPressed(int key) {
+        return glfwGetKey(SPOT.window, key) == GLFW_PRESS;
+    }
+    public static double getDeltaTime() {
+        double currentTime = getTime();
+        double deltaTime = currentTime - SPOT.lastFrameTime;
+        SPOT.lastFrameTime = currentTime;
+        return deltaTime;
+    }
+    public static double getTime() {
+        return System.nanoTime() / 1_000_000_000.0; // Convert nanoseconds to seconds
+    }
+
+
+
 }

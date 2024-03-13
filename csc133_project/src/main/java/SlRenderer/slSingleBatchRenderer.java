@@ -3,11 +3,16 @@ package SlRenderer;
 
 
 import csc133.slWindow;
-import org.joml.Matrix4f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.*;
+
+import javax.swing.*;
+import java.io.*;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+
+
+import static csc133.slWindow.getDeltaTime;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL11.glVertexPointer;
@@ -35,13 +40,97 @@ public class slSingleBatchRenderer {
         SPOT.window.destroy();
     }
     void renderLoop() {
-        /* Process window messages in the main thread */
         while (!glfwWindowShouldClose(SPOT.window.getWindowID())) {
             glfwPollEvents();
-            goLBoard.updateBoard(); // Update board state
-            renderObjects();
-            glfwSwapBuffers(SPOT.window.getWindowID());
-            //glfwPollEvents();
+
+            if (!SPOT.haltRendering) {
+                goLBoard.updateBoard();
+                renderObjects();
+                glfwSwapBuffers(SPOT.window.getWindowID());
+            }
+            // Restart rendering if space key is pressed
+            if (SPOT.window.isKeyPressed(GLFW_KEY_SPACE)) {
+                goLBoard.initializeBoard();
+                SPOT.restartRendering = true;
+                SPOT.haltRendering = false;
+            }
+            // Randomize arrays and restart rendering if 'r' key is pressed
+            if (SPOT.window.isKeyPressed(GLFW_KEY_R) && !SPOT.rKeyPressedLastFrame) {
+                goLBoard.initializeBoard();
+                SPOT.restartRendering = true;
+                SPOT.rKeyPressedLastFrame = true;
+            } else if (!SPOT.window.isKeyPressed(GLFW_KEY_R)) {
+                SPOT.rKeyPressedLastFrame = false;
+            }
+
+            // Update board state only if not restarting rendering
+            if (!SPOT.restartRendering) {
+                goLBoard.updateBoard();
+            }
+            // Toggle artificial frame rate delay if 'd' key is pressed
+            if (SPOT.window.isKeyPressed(GLFW_KEY_D) && !SPOT.dKeyPressedLastFrame) {
+                SPOT.toggleDelay = !SPOT.toggleDelay;
+                SPOT.dKeyPressedLastFrame = true;
+            } else if (!SPOT.window.isKeyPressed(GLFW_KEY_D)) {
+                SPOT.dKeyPressedLastFrame = false;
+            }
+            //Apply delay if toggled on
+            if (SPOT.toggleDelay) {
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            // Halt rendering
+            if (SPOT.window.isKeyPressed(GLFW_KEY_H)) {
+                SPOT.haltRendering = true;
+            }
+            // Toggle frame rate in console if 'f' key is pressed
+            if (SPOT.window.isKeyPressed(GLFW_KEY_F) && !SPOT.fKeyPressedLastFrame) {
+                SPOT.showFrameRate = !SPOT.showFrameRate;
+                SPOT.fKeyPressedLastFrame = true;
+            } else if (!SPOT.window.isKeyPressed(GLFW_KEY_F)) {
+                SPOT.fKeyPressedLastFrame = false;
+            }
+            // Display frame rate in console
+            if (SPOT.showFrameRate) {
+                System.out.println("Frame rate: " + (int) (1 / getDeltaTime()));
+            }
+            // Save status to file when 's' key is pressed
+            if (SPOT.window.isKeyPressed(GLFW_KEY_S) && !SPOT.sKeyPressedLastFrame) {
+                saveStatusToFile();
+                SPOT.sKeyPressedLastFrame = true;
+            } else if (!SPOT.window.isKeyPressed(GLFW_KEY_S)) {
+                SPOT.sKeyPressedLastFrame = false;
+            }
+            // Load status from file when 'l' is pressed
+            if (SPOT.window.isKeyPressed(GLFW_KEY_L) && !SPOT.lKeyPressedLastFrame) {
+                loadStatusFromFile();
+                SPOT.lKeyPressedLastFrame = true;
+            } else if (!SPOT.window.isKeyPressed(GLFW_KEY_L)) {
+                SPOT.lKeyPressedLastFrame = false;
+            }
+            // Print usage when '?' is pressed
+            if (SPOT.window.isKeyPressed(GLFW_KEY_SLASH) && !SPOT.questionKeyPressedLastFrame) {
+                SPOT.showUsage = true;
+                SPOT.questionKeyPressedLastFrame = true;
+            } else if (!SPOT.window.isKeyPressed(GLFW_KEY_SLASH)) {
+                SPOT.questionKeyPressedLastFrame = false;
+            }
+            // Print usage if the flag is set
+            if (SPOT.showUsage) {
+                printUsage();
+                SPOT.showUsage = false;
+            }
+            if (SPOT.window.isKeyPressed(GLFW_KEY_ESCAPE)) {
+                glfwSetWindowShouldClose(SPOT.window.getWindowID(), true);
+            }
+            // Reset restartRendering flag
+            if (SPOT.restartRendering) {
+                SPOT.restartRendering = false;
+            }
+
         }
     } // void renderLoop()
      void initOpenGL() {
@@ -116,7 +205,6 @@ public class slSingleBatchRenderer {
                         glUniform3f(SPOT.renderColorLocation, 1.0f, 0.0f, 0.0f); // Red for dead cell
                     }
 
-                    //viewProjMatrix.setOrtho(ORTHO_LEFT, ORTHO_RIGHT, ORTHO_BOTTOM, ORTHO_TOP, ORTHO_NEAR, ORTHO_FAR);
                     slCamera my_cam = new slCamera();
                     my_cam.setProjectionOrtho(SPOT.ORTHO_LEFT, SPOT.ORTHO_RIGHT, SPOT.ORTHO_BOTTOM, SPOT.ORTHO_TOP, SPOT.ORTHO_NEAR, SPOT.ORTHO_FAR);
                     SPOT.viewProjMatrix = my_cam.getProjectionMatrix();
@@ -133,5 +221,77 @@ public class slSingleBatchRenderer {
 
             glfwSwapBuffers(SPOT.window.getWindowID());
     }
+
+    private void saveStatusToFile() {
+        // Get the status
+        String status = slGoLBoard.getStatus();
+
+        // Create a file chooser dialog to let the user choose where to save the file
+        JFileChooser fileChooser = new JFileChooser();
+        int userSelection = fileChooser.showSaveDialog(null);
+
+        // If the user chooses a file and clicks "Save"
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            // Get the selected file
+            String filePath = fileChooser.getSelectedFile().getAbsolutePath();
+
+            // Append ".ca" extension if not already present
+            if (!filePath.endsWith(".ca")) {
+                filePath += ".ca";
+            }
+
+            // Save the status to the selected file
+            try (PrintWriter writer = new PrintWriter(new FileWriter(filePath))) {
+                writer.println(status);
+                JOptionPane.showMessageDialog(null, "Status saved to " + filePath);
+            } catch (IOException e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(null, "Error saving status to " + filePath);
+            }
+        }
+    }
+
+    private void loadStatusFromFile() {
+        // Create a file chooser dialog to select the file
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Select a file to load status from");
+
+        int userSelection = fileChooser.showOpenDialog(null);
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            File fileToLoad = fileChooser.getSelectedFile();
+
+            try (BufferedReader reader = new BufferedReader(new FileReader(fileToLoad))) {
+                // Read the content of the file and update the status of the GoL board accordingly
+                String line;
+                int row = 0;
+                int numRows = 0;
+                while ((line = reader.readLine()) != null && row < numRows) {
+                    int numCols = 0;
+                    for (int col = 0; col < numCols && col < line.length(); col++) {
+                        // Assuming '1' represents a live cell and '0' represents a dead cell
+                        goLBoard.setCellState(row, col, line.charAt(col) == '1');
+                    }
+                    row++;
+                }
+                JOptionPane.showMessageDialog(null, "Status loaded successfully from: " + fileToLoad.getAbsolutePath());
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(null, "Error reading file: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    public void printUsage() {
+        System.out.println("Usage:");
+        System.out.println("Space: Restart rendering");
+        System.out.println("R: Randomize arrays and restart rendering");
+        System.out.println("D: Toggle artificial frame rate delay");
+        System.out.println("H: Halt rendering");
+        System.out.println("F: Toggle frame rate display in console");
+        System.out.println("S: Save status to file");
+        System.out.println("L: Load status from file");
+        System.out.println("?: Print usage instructions to console");
+    }
+
+
 
 }

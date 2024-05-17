@@ -3,10 +3,10 @@ This project utilizes The Game of life Adaptation by John Horton Conway which us
 
 # Keyboard interactions
 Space: Restart rendering
-R: Randomize arrays and restart rendering
-D: Toggle artificial frame rate delay
-H: Halt rendering
-F: Toggle frame rate display in console
-S: Save status to file
-L: Load status from file
+R: Randomize arrays and restart rendering, 
+D: Toggle artificial frame rate delay, 
+H: Halt rendering, 
+F: Toggle frame rate display in console, 
+S: Save status to file,
+L: Load status from file and
 ?: Print usage instructions to console

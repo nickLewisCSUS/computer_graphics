@@ -1,9 +1,11 @@
 package csc133;
-
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWFramebufferSizeCallback;
 import org.lwjgl.glfw.GLFWKeyCallback;
-
+/**
+ * The SPOT class holds global variables and GLFW callback instances
+ * for managing the application's window state and behavior.
+ */
 public class SPOT {
 
     // GLFW callbacks
@@ -17,5 +19,4 @@ public class SPOT {
     public static int WIN_POS_X, WIN_POS_Y;
 
     public static double lastFrameTime;
-
 }

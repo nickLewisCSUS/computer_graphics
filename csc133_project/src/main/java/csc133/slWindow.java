@@ -1,30 +1,24 @@
-
 package csc133;
-
-
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWFramebufferSizeCallback;
 import org.lwjgl.glfw.GLFWKeyCallback;
-import org.lwjgl.glfw.GLFWVidMode;
-
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
-
-
+/**
+ * The slWindow class manages the creation and handling of an OpenGL window
+ * using GLFW. It sets up window properties, handles input callbacks, and
+ * provides methods for interacting with the window.
+ */
 public class slWindow {
-
     public slWindow(int win_width, int win_height, int win_x, int win_y) {
-
         System.out.println("Call to slWindow:: (width, height) == ("
                         + win_width + ", " + win_height +") received!");
-
         SPOT.WIN_WIDTH = win_width;
         SPOT.WIN_HEIGHT = win_height;
         SPOT.WIN_POS_X = win_x;
         SPOT.WIN_POS_Y = win_y;
         initGLFWindow();
     }
-
     public void initGLFWindow() {
         glfwSetErrorCallback(SPOT.errorCallback =
                 GLFWErrorCallback.createPrint(System.err));
@@ -47,7 +41,7 @@ public class slWindow {
                     glfwSetWindowShouldClose(window, true);
             }
         });
-        glfwSetFramebufferSizeCallback(SPOT.window, SPOT.fbCallback = new
+        glfwSetFramebufferSizeCallback(SPOT.window, SPOT.fbCallback =new
                 GLFWFramebufferSizeCallback() {
                     @Override
                     public void invoke(long window, int w, int h) {
@@ -57,15 +51,13 @@ public class slWindow {
                         }
                     }
                 });
-        GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+        glfwGetVideoMode(glfwGetPrimaryMonitor());
         glfwSetWindowPos(SPOT.window, SPOT.WIN_POS_X, SPOT.WIN_POS_Y);
         glfwMakeContextCurrent(SPOT.window);
         int VSYNC_INTERVAL = 1;
         glfwSwapInterval(VSYNC_INTERVAL);
         glfwShowWindow(SPOT.window);
-    } // private void initGLFWindow()
-
-
+    }
     public void destroy(){
         glfwDestroyWindow(SPOT.window);
     }
@@ -81,7 +73,6 @@ public class slWindow {
     public GLFWFramebufferSizeCallback getFbCallback(){
         return SPOT.fbCallback;
     }
-
     public boolean isKeyPressed(int key) {
         return glfwGetKey(SPOT.window, key) == GLFW_PRESS;
     }
@@ -94,7 +85,4 @@ public class slWindow {
     public static double getTime() {
         return System.nanoTime() / 1_000_000_000.0; // Convert nanoseconds to seconds
     }
-
-
-
 }

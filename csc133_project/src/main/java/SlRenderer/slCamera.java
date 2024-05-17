@@ -1,24 +1,17 @@
 package SlRenderer;
-
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
-
 import static SlRenderer.SPOT.*;
-
+/**
+ * The slCamera class manages the camera's position and projection in a 3D space,
+ * providing methods to set an orthographic projection and retrieve view and projection matrices.
+ */
 public class slCamera {
-
     private void setCamera() {
-
     }
-
     public slCamera(Vector3f camera_position){
-
     }
     public slCamera(){
-
-    }
-
-    public void setProjectionOrtho(){
 
     }
     public void setProjectionOrtho(float left, float right, float bottom, float top, float near, float far) {
@@ -39,8 +32,4 @@ public class slCamera {
     public Matrix4f getProjectionMatrix(){
         return SPOT.projectionMatrix;
     }
-
-
-
-
 }

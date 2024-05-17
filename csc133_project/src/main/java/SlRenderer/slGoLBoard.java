@@ -1,13 +1,14 @@
 package SlRenderer;
-
 import java.util.Random;
-
+/**
+ * The slGoLBoard class represents the Game of Life board,
+ * managing the state of cells and updating their states based on the game's rules.
+ */
 public class slGoLBoard {
     private static boolean[][] liveCellArray;
     private boolean[][] nextCellArray;
     private static int numRows;
     private static int numCols;
-
     public slGoLBoard(int numRows, int numCols) {
         this.numRows = numRows;
         this.numCols = numCols;
@@ -15,7 +16,6 @@ public class slGoLBoard {
         nextCellArray = new boolean[numRows][numCols];
         initializeBoard();
     }
-
     public void initializeBoard() {
         // Initialize the board here (randomly or as needed)
         Random random = new Random();
@@ -25,18 +25,13 @@ public class slGoLBoard {
             }
         }
     }
-
     public void updateBoard() {
         for (int row = 0; row < numRows; row++) {
             for (int col = 0; col < numCols; col++) {
                 int degreeTwoNeighbors = countDegreeTwoNeighbors(row, col);
                 if (liveCellArray[row][col]) {
-                    // Any live cell with fewer than two live neighbors dies
-                    // Any live cell with two or three live neighbors lives on to the next generation
-                    // Any live cell with more than three live neighbors dies
                     nextCellArray[row][col] = degreeTwoNeighbors == 2 || degreeTwoNeighbors == 3;
                 } else {
-                    // Any dead cell with exactly three live neighbors becomes a live cell
                     nextCellArray[row][col] = degreeTwoNeighbors == 3;
                 }
             }
@@ -46,7 +41,6 @@ public class slGoLBoard {
         liveCellArray = nextCellArray;
         nextCellArray = temp;
     }
-
     private int countDegreeTwoNeighbors(int row, int col) {
         int count = 0;
         for (int i = row - 2; i <= row + 2; i++) {
@@ -60,7 +54,6 @@ public class slGoLBoard {
         }
         return count;
     }
-
     public static String getStatus() {
         StringBuilder status = new StringBuilder();
         for (int row = 0; row < numRows; row++) {
@@ -71,7 +64,6 @@ public class slGoLBoard {
         }
         return status.toString();
     }
-
     public static boolean isCellAlive(int row, int col) {
         return liveCellArray[row][col];
     }

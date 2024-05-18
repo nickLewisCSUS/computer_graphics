@@ -8,8 +8,8 @@ D: Toggle artificial frame rate delay,
 H: Halt rendering, 
 F: Toggle frame rate display in console, 
 S: Save status to file,
-L: Load status from file and
-?: Print usage instructions to console
+L: Load status from file, and
+?: Print usage instructions to console.
 
 # Requirements
 Make sure to use Windows operating system and not Mac. Intellij was the open-source platfrom is was created on, so it is preferred to use this IDE.

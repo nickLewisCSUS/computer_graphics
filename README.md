@@ -12,4 +12,4 @@ L: Load status from file and
 ?: Print usage instructions to console
 
 # Requirements
-Make sure to use windows operating system and not Mac. Intellij was the open-source platfrom is was created on, so it is preferred to use this IDE.
+Make sure to use Windows operating system and not Mac. Intellij was the open-source platfrom is was created on, so it is preferred to use this IDE.

@@ -10,3 +10,6 @@ F: Toggle frame rate display in console,
 S: Save status to file,
 L: Load status from file and
 ?: Print usage instructions to console
+
+# Requirements
+Make sure to use windows operating system and not Mac. Intellij was the open-source platfrom is was created on, so it is preferred to use this IDE.
